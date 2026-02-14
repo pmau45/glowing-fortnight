@@ -44,7 +44,6 @@
             90% { transform: translate(10%, 5%); }
         }
 
-```
     .noise-overlay {
         position: fixed;
         top: -50%;
@@ -182,12 +181,10 @@
         left: 100%;
     }
 </style>
-```
 
 </head>
 <body class="bg-ranger text-bone font-sans antialiased selection:bg-signal selection:text-white overflow-x-hidden">
 
-```
 <!-- Noise and scan line overlays -->
 <div class="noise-overlay"></div>
 <div class="scan-line"></div>
@@ -633,7 +630,6 @@
         revealOnScroll.observe(element);
     });
 </script>
-```
 
 </body>
 </html>
