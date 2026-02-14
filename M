@@ -421,7 +421,11 @@
                 </p>
             </div>
 
-            <form action="#" method="POST" class="space-y-6">
+            <form name="axiom-intake" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="space-y-6">
+                <input type="hidden" name="form-name" value="axiom-intake">
+                <p style="display:none;">
+                    <label>Don't fill this out if you're human: <input name="bot-field" /></label>
+                </p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
                     <div class="relative">
                         <label for="name" class="block font-tactical uppercase tracking-wider text-bone mb-2 text-sm sm:text-base">YOUR NAME</label>
@@ -498,6 +502,78 @@
         if (event.key === "Escape" && !modal.classList.contains('hidden')) {
             closeModal();
         }
+    });
+
+    // Enhanced form submission handling
+    const form = document.querySelector('#intake-modal form');
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalButtonContent = submitButton.innerHTML;
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Disable button and show loading state
+        submitButton.disabled = true;
+        submitButton.innerHTML = `
+            <span class="relative z-10 flex items-center justify-center gap-3">
+                <svg class="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                SENDING...
+            </span>
+        `;
+
+        // Submit form via fetch
+        fetch('/', {
+            method: 'POST',
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams(new FormData(form)).toString()
+        })
+        .then(response => {
+            if (response.ok) {
+                // Show success state
+                submitButton.className = submitButton.className.replace('bg-signal', 'bg-green-600').replace('border-signal', 'border-green-600');
+                submitButton.innerHTML = `
+                    <span class="relative z-10 flex items-center justify-center gap-3">
+                        ✓ MESSAGE SENT
+                    </span>
+                `;
+
+                // Reset form after 2 seconds and close modal
+                setTimeout(() => {
+                    form.reset();
+                    closeModal();
+                    
+                    // Restore original button state after modal closes
+                    setTimeout(() => {
+                        submitButton.disabled = false;
+                        submitButton.className = submitButton.className.replace('bg-green-600', 'bg-signal').replace('border-green-600', 'border-signal');
+                        submitButton.innerHTML = originalButtonContent;
+                    }, 300);
+                }, 2000);
+            } else {
+                throw new Error('Form submission failed');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            
+            // Show error state
+            submitButton.className = submitButton.className.replace('bg-signal', 'bg-red-600').replace('border-signal', 'border-red-600').replace('bg-green-600', 'bg-red-600').replace('border-green-600', 'border-red-600');
+            submitButton.innerHTML = `
+                <span class="relative z-10 flex items-center justify-center gap-3">
+                    ✕ ERROR - TRY AGAIN
+                </span>
+            `;
+
+            // Restore original button state after 3 seconds
+            setTimeout(() => {
+                submitButton.disabled = false;
+                submitButton.className = submitButton.className.replace('bg-red-600', 'bg-signal').replace('border-red-600', 'border-signal');
+                submitButton.innerHTML = originalButtonContent;
+            }, 3000);
+        });
     });
 
     // Scroll-triggered fade-in animations
