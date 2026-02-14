@@ -508,6 +508,7 @@
     const form = document.querySelector('#intake-modal form');
     const submitButton = form.querySelector('button[type="submit"]');
     const originalButtonContent = submitButton.innerHTML;
+    const originalButtonClassName = submitButton.className;
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -533,7 +534,7 @@
         .then(response => {
             if (response.ok) {
                 // Show success state
-                submitButton.className = submitButton.className.replace('bg-signal', 'bg-green-600').replace('border-signal', 'border-green-600');
+                submitButton.className = originalButtonClassName.replace(/bg-signal/g, 'bg-green-600').replace(/border-signal/g, 'border-green-600');
                 submitButton.innerHTML = `
                     <span class="relative z-10 flex items-center justify-center gap-3">
                         ✓ MESSAGE SENT
@@ -548,7 +549,7 @@
                     // Restore original button state after modal closes
                     setTimeout(() => {
                         submitButton.disabled = false;
-                        submitButton.className = submitButton.className.replace('bg-green-600', 'bg-signal').replace('border-green-600', 'border-signal');
+                        submitButton.className = originalButtonClassName;
                         submitButton.innerHTML = originalButtonContent;
                     }, 300);
                 }, 2000);
@@ -560,7 +561,7 @@
             console.error('Error:', error);
             
             // Show error state
-            submitButton.className = submitButton.className.replace('bg-signal', 'bg-red-600').replace('border-signal', 'border-red-600').replace('bg-green-600', 'bg-red-600').replace('border-green-600', 'border-red-600');
+            submitButton.className = originalButtonClassName.replace(/bg-signal/g, 'bg-red-600').replace(/border-signal/g, 'border-red-600');
             submitButton.innerHTML = `
                 <span class="relative z-10 flex items-center justify-center gap-3">
                     ✕ ERROR - TRY AGAIN
@@ -570,7 +571,7 @@
             // Restore original button state after 3 seconds
             setTimeout(() => {
                 submitButton.disabled = false;
-                submitButton.className = submitButton.className.replace('bg-red-600', 'bg-signal').replace('border-red-600', 'border-signal');
+                submitButton.className = originalButtonClassName;
                 submitButton.innerHTML = originalButtonContent;
             }, 3000);
         });
