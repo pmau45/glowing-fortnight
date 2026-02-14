@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Axiom Canine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ranger: '#2F3A25',
+                        mud: '#3B3024',
+                        bone: '#EBE9E1',
+                        coyote: '#D2B48C',
+                        signal: '#FF4500'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        tactical: ['Bebas Neue', 'sans-serif'],
+                        mono: ['Space Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Noise texture overlay for grit */
+        @keyframes noise {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-5%, -5%); }
+            20% { transform: translate(-10%, 5%); }
+            30% { transform: translate(5%, -10%); }
+            40% { transform: translate(-5%, 15%); }
+            50% { transform: translate(-10%, 5%); }
+            60% { transform: translate(15%, 0); }
+            70% { transform: translate(0, 10%); }
+            80% { transform: translate(-15%, 0); }
+            90% { transform: translate(10%, 5%); }
+        }
+
+```
+    .noise-overlay {
+        position: fixed;
+        top: -50%;
+        left: -50%;
+        right: -50%;
+        bottom: -50%;
+        width: 200%;
+        height: 200%;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='3.5' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        opacity: 0.025;
+        pointer-events: none;
+        animation: noise 0.2s infinite;
+        z-index: 1000;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #2F3A25;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #D2B48C;
+        border: 2px solid #2F3A25;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #FF4500;
+    }
+
+    /* Prevent zoom on inputs */
+    input, textarea {
+        font-size: 16px !important;
+    }
+
+    /* Scan line effect */
+    @keyframes scan {
+        0% { transform: translateY(-100%); }
+        100% { transform: translateY(100vh); }
+    }
+
+    .scan-line {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(transparent, #FF4500, transparent);
+        opacity: 0.15;
+        animation: scan 8s linear infinite;
+        pointer-events: none;
+        z-index: 999;
+    }
+
+    /* Fade in on scroll animations */
+    .fade-in-section {
+        opacity: 0;
+        transform: translateY(40px);
+        transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                    transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .fade-in-section.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Staggered delays for grid items */
+    .stagger-1 { transition-delay: 0.1s; }
+    .stagger-2 { transition-delay: 0.2s; }
+    .stagger-3 { transition-delay: 0.3s; }
+    .stagger-4 { transition-delay: 0.4s; }
+
+    /* Glitch effect for hero text */
+    @keyframes glitch {
+        0% { transform: translate(0); }
+        20% { transform: translate(-2px, 2px); }
+        40% { transform: translate(-2px, -2px); }
+        60% { transform: translate(2px, 2px); }
+        80% { transform: translate(2px, -2px); }
+        100% { transform: translate(0); }
+    }
+
+    .glitch-text:hover {
+        animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both;
+    }
+
+    /* Modal entrance animation */
+    @keyframes modal-slide-in {
+        from {
+            opacity: 0;
+            transform: scale(0.95) translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    #intake-modal.flex .modal-content {
+        animation: modal-slide-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Parallax background */
+    .parallax-bg {
+        transform: translateY(var(--scroll-y, 0));
+        transition: transform 0.1s ease-out;
+    }
+
+    /* Grid overlay */
+    .grid-overlay {
+        background-image: 
+            linear-gradient(rgba(210, 180, 140, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(210, 180, 140, 0.05) 1px, transparent 1px);
+        background-size: 40px 40px;
+    }
+
+    /* Border reveal effect */
+    .border-reveal {
+        position: relative;
+        overflow: hidden;
+    }
+    .border-reveal::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        border-left: 4px solid #FF4500;
+        transition: left 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .border-reveal.is-visible::after {
+        left: 100%;
+    }
+</style>
+```
+
+</head>
+<body class="bg-ranger text-bone font-sans antialiased selection:bg-signal selection:text-white overflow-x-hidden">
+
+```
+<!-- Noise and scan line overlays -->
+<div class="noise-overlay"></div>
+<div class="scan-line"></div>
+
+<!-- Navigation / Header -->
+<nav class="border-b-4 border-mud bg-ranger/98 sticky top-0 z-50 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center gap-2">
+        <h1 class="font-tactical text-2xl sm:text-3xl md:text-4xl tracking-[0.2em] uppercase text-bone leading-none">
+            AXIOM <span class="text-coyote block sm:inline tracking-[0.3em]">CANINE</span>
+        </h1>
+        
+        <a href="tel:+15551234567" class="bg-signal text-white font-tactical text-base sm:text-lg md:text-xl uppercase tracking-[0.2em] py-2 px-3 sm:px-4 md:px-6 border-2 border-signal shadow-[4px_4px_0px_#3B3024] hover:shadow-[1px_1px_0px_#3B3024] hover:translate-y-[3px] hover:translate-x-[3px] transition-all duration-200 flex items-center gap-2 whitespace-nowrap group">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 sm:w-5 sm:h-5 group-hover:animate-pulse">
+                <path fill-rule="evenodd" d="M1.5 4.5a3 3 0 013-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 01-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 006.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 011.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 01-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5z" clip-rule="evenodd" />
+            </svg>
+            <span class="hidden xs:block">CALL US</span>
+            <span class="block xs:hidden">CALL</span>
+        </a>
+    </div>
+</nav>
+
+<!-- Hero Section with Parallax -->
+<header class="relative px-4 sm:px-6 py-20 sm:py-32 md:py-48 flex items-center border-b-8 border-coyote overflow-hidden">
+    <!-- Parallax background layer -->
+    <div class="absolute inset-0 parallax-bg grid-overlay opacity-20"></div>
+    
+    <!-- Animated dots pattern -->
+    <div class="absolute inset-0 opacity-5" style="background-image: radial-gradient(#D2B48C 2px, transparent 2px); background-size: 30px 30px;"></div>
+    
+    <!-- Corner accents -->
+    <div class="absolute top-4 left-4 w-16 h-16 border-t-4 border-l-4 border-signal opacity-30"></div>
+    <div class="absolute bottom-4 right-4 w-16 h-16 border-b-4 border-r-4 border-signal opacity-30"></div>
+    
+    <div class="max-w-6xl mx-auto relative z-10 w-full">
+        <h2 class="font-tactical text-5xl sm:text-6xl md:text-8xl lg:text-9xl uppercase tracking-tight leading-[0.9] mb-8 md:mb-10 fade-in-section stagger-1">
+            WE DON'T HAND OUT <br/>
+            <span class="text-signal glitch-text inline-block">PARTICIPATION TROPHIES.</span>
+        </h2>
+        
+        <p class="text-xl sm:text-2xl md:text-4xl font-bold text-coyote max-w-4xl leading-tight mb-10 md:mb-12 fade-in-section stagger-2">
+            We forge dogs—and the people who run them—who can handle real life off-leash, anywhere.
+        </p>
+        
+        <button onclick="openModal()" class="fade-in-section stagger-3 group inline-block bg-mud text-bone font-tactical text-xl md:text-3xl uppercase tracking-[0.2em] py-4 sm:py-5 px-8 sm:px-12 border-4 border-coyote shadow-[8px_8px_0px_#D2B48C] hover:shadow-[2px_2px_0px_#D2B48C] hover:translate-y-[6px] hover:translate-x-[6px] transition-all duration-200 relative overflow-hidden">
+            <span class="relative z-10 flex items-center gap-3">
+                START THE WORK
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-6 h-6 group-hover:translate-x-1 transition-transform">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+            </span>
+            <div class="absolute inset-0 bg-signal transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+        </button>
+    </div>
+</header>
+
+<!-- Operating System Section -->
+<section class="bg-mud px-4 sm:px-6 py-20 sm:py-28 md:py-40 border-b-4 border-ranger fade-in-section">
+    <div class="max-w-5xl mx-auto">
+        <div class="text-center mb-6">
+            <span class="font-tactical text-signal text-xl sm:text-2xl tracking-[0.3em] uppercase">OPERATING SYSTEM</span>
+        </div>
+        <p class="text-2xl sm:text-3xl md:text-5xl font-bold leading-tight text-center text-bone">
+            For people who refuse to let their dog become collateral damage to a busy life.
+            <span class="block mt-4 text-coyote">We build unbreakable off-leash dogs and the humans tough enough to keep up with them.</span>
+        </p>
+    </div>
+</section>
+
+<!-- The Method / Deliverables -->
+<section class="px-4 sm:px-6 py-20 sm:py-28 md:py-40 bg-ranger grid-overlay relative">
+    <div class="max-w-7xl mx-auto">
+        <div class="mb-12 md:mb-16 fade-in-section">
+            <h3 class="font-tactical text-4xl sm:text-5xl md:text-7xl uppercase tracking-wider text-bone mb-3">
+                THE METHOD
+            </h3>
+            <div class="h-2 w-24 bg-signal mb-4"></div>
+            <p class="font-mono text-coyote text-base sm:text-lg tracking-wide">
+                // Four pillars. Zero excuses.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
+            <!-- Item 1 -->
+            <div class="border-l-4 border-coyote pl-6 sm:pl-8 py-4 hover:border-signal transition-all duration-300 group fade-in-section stagger-1 border-reveal relative bg-mud/20 hover:bg-mud/40">
+                <div class="absolute top-2 right-2 font-mono text-coyote/30 text-xs group-hover:text-signal/50 transition-colors">01</div>
+                <p class="text-lg sm:text-xl md:text-2xl font-bold group-hover:text-white transition-colors duration-300">
+                    <strong class="text-coyote font-tactical text-2xl sm:text-3xl md:text-4xl uppercase tracking-wider block mb-2 sm:mb-3 group-hover:text-signal">DAILY TRAINING PLANS</strong> 
+                    Protocols that actually fit your real schedule—not some fantasy 9-to-5 version of it.
+                </p>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="border-l-4 border-coyote pl-6 sm:pl-8 py-4 hover:border-signal transition-all duration-300 group fade-in-section stagger-2 border-reveal relative bg-mud/20 hover:bg-mud/40">
+                <div class="absolute top-2 right-2 font-mono text-coyote/30 text-xs group-hover:text-signal/50 transition-colors">02</div>
+                <p class="text-lg sm:text-xl md:text-2xl font-bold group-hover:text-white transition-colors duration-300">
+                    <strong class="text-coyote font-tactical text-2xl sm:text-3xl md:text-4xl uppercase tracking-wider block mb-2 sm:mb-3 group-hover:text-signal">CONDITIONING WORK</strong> 
+                    Workouts that gas your dog the right way—building drive, endurance, and heart.
+                </p>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="border-l-4 border-coyote pl-6 sm:pl-8 py-4 hover:border-signal transition-all duration-300 group fade-in-section stagger-3 border-reveal relative bg-mud/20 hover:bg-mud/40">
+                <div class="absolute top-2 right-2 font-mono text-coyote/30 text-xs group-hover:text-signal/50 transition-colors">03</div>
+                <p class="text-lg sm:text-xl md:text-2xl font-bold group-hover:text-white transition-colors duration-300">
+                    <strong class="text-coyote font-tactical text-2xl sm:text-3xl md:text-4xl uppercase tracking-wider block mb-2 sm:mb-3 group-hover:text-signal">PROOFING SESSIONS</strong> 
+                    Drills that turn "I hope he comes when I call" into "He's already beating me back to the truck."
+                </p>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="border-l-4 border-coyote pl-6 sm:pl-8 py-4 hover:border-signal transition-all duration-300 group fade-in-section stagger-4 border-reveal relative bg-mud/20 hover:bg-mud/40">
+                <div class="absolute top-2 right-2 font-mono text-coyote/30 text-xs group-hover:text-signal/50 transition-colors">04</div>
+                <p class="text-lg sm:text-xl md:text-2xl font-bold group-hover:text-white transition-colors duration-300">
+                    <strong class="text-coyote font-tactical text-2xl sm:text-3xl md:text-4xl uppercase tracking-wider block mb-2 sm:mb-3 group-hover:text-signal">FIELD-GRADE GEAR</strong> 
+                    Equipment that survives mud, river crossings, and those sketchy roll-ins that somehow always happen.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- The Philosophy / Vision -->
+<section class="bg-signal px-4 sm:px-6 py-20 sm:py-32 md:py-48 border-y-8 border-mud relative overflow-hidden fade-in-section">
+    <!-- Diagonal stripe pattern -->
+    <div class="absolute inset-0 opacity-10" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, #fff 10px, #fff 20px);"></div>
+    
+    <div class="max-w-6xl mx-auto text-center relative z-10">
+        <div class="mb-6 sm:mb-8">
+            <span class="font-tactical text-mud text-xl sm:text-2xl tracking-[0.3em] uppercase opacity-70">THE MISSION</span>
+        </div>
+        
+        <h2 class="font-tactical text-4xl sm:text-5xl md:text-7xl lg:text-8xl text-mud uppercase tracking-tight leading-[0.95] mb-8 sm:mb-12">
+            WE'RE NOT HERE TO MAKE YOUR DOG TOLERATE YOUR LIFE.
+        </h2>
+        <p class="font-tactical text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-white uppercase tracking-tight leading-[0.95]">
+            WE'RE HERE TO MAKE YOUR LIFE BIG ENOUGH FOR BOTH OF YOU.
+        </p>
+    </div>
+</section>
+
+<!-- Core DNA -->
+<section class="bg-mud px-4 sm:px-6 py-20 sm:py-32 md:py-48 fade-in-section">
+    <div class="max-w-5xl mx-auto">
+        <div class="mb-12 md:mb-16">
+            <h3 class="font-tactical text-4xl sm:text-5xl md:text-7xl uppercase tracking-wider text-coyote mb-4 border-b-4 border-ranger pb-6">
+                CORE DNA
+            </h3>
+            <p class="text-bone/50 font-mono italic text-base sm:text-lg tracking-wider">
+                // this never changes
+            </p>
+        </div>
+        
+        <ul class="space-y-6 sm:space-y-8">
+            <li class="flex items-start text-xl sm:text-2xl md:text-3xl font-bold group hover:translate-x-4 transition-transform duration-300 fade-in-section stagger-1">
+                <span class="text-signal mr-4 sm:mr-6 font-bold text-3xl sm:text-4xl leading-none mt-1">▸</span>
+                <span class="group-hover:text-signal transition-colors">GRIT OVER FLUFF</span>
+            </li>
+            <li class="flex items-start text-xl sm:text-2xl md:text-3xl font-bold group hover:translate-x-4 transition-transform duration-300 fade-in-section stagger-2">
+                <span class="text-signal mr-4 sm:mr-6 font-bold text-3xl sm:text-4xl leading-none mt-1">▸</span>
+                <span class="group-hover:text-signal transition-colors">FREEDOM EARNED, NEVER GIVEN</span>
+            </li>
+            <li class="flex items-start text-xl sm:text-2xl md:text-3xl font-bold group hover:translate-x-4 transition-transform duration-300 fade-in-section stagger-3">
+                <span class="text-signal mr-4 sm:mr-6 font-bold text-3xl sm:text-4xl leading-none mt-1">▸</span>
+                <span class="group-hover:text-signal transition-colors">REAL TRAILS, REAL SWEAT, REAL TRUST</span>
+            </li>
+            <li class="flex items-start text-xl sm:text-2xl md:text-3xl font-bold group hover:translate-x-4 transition-transform duration-300 fade-in-section stagger-4">
+                <span class="text-signal mr-4 sm:mr-6 font-bold text-3xl sm:text-4xl leading-none mt-1">▸</span>
+                <span class="group-hover:text-signal transition-colors">NO ROOM FOR SLOPPY TRAINING</span>
+            </li>
+            <li class="flex items-start text-xl sm:text-2xl md:text-3xl font-bold group hover:translate-x-4 transition-transform duration-300 fade-in-section stagger-4">
+                <span class="text-signal mr-4 sm:mr-6 font-bold text-3xl sm:text-4xl leading-none mt-1">▸</span>
+                <span class="group-hover:text-signal transition-colors">DOGS AND PEOPLE GET STRONGER TOGETHER—OR NOT AT ALL</span>
+            </li>
+        </ul>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="bg-ranger px-4 sm:px-6 py-24 sm:py-32 md:py-48 border-t-8 border-signal relative overflow-hidden fade-in-section">
+    <div class="absolute inset-0 grid-overlay opacity-10"></div>
+    
+    <div class="max-w-4xl mx-auto text-center relative z-10">
+        <h2 class="font-tactical text-5xl sm:text-6xl md:text-8xl lg:text-9xl uppercase text-bone mb-6 sm:mb-8 tracking-tight leading-[0.9]">
+            THE WORK<br/>STARTS HERE.
+        </h2>
+        
+        <p class="text-xl sm:text-2xl md:text-3xl text-coyote mb-12 sm:mb-16 font-bold">
+            No shortcuts. No safety nets. Get started.
+        </p>
+        
+        <button onclick="openModal()" class="group inline-block bg-signal text-white font-tactical text-2xl sm:text-3xl md:text-5xl uppercase tracking-[0.15em] py-5 sm:py-7 px-8 sm:px-16 border-4 border-signal transition-all duration-300 shadow-[10px_10px_0px_#3B3024] hover:shadow-[3px_3px_0px_#3B3024] hover:translate-y-[7px] hover:translate-x-[7px] hover:bg-white hover:text-signal hover:border-white relative overflow-hidden">
+            <span class="relative z-10 flex items-center justify-center gap-4">
+                LET'S TALK
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-8 h-8 group-hover:rotate-90 transition-transform duration-500">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+            </span>
+        </button>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-mud px-4 sm:px-6 py-12 sm:py-16 border-t-4 border-ranger text-center">
+    <h4 class="font-tactical text-2xl sm:text-3xl tracking-[0.3em] uppercase text-bone opacity-40 mb-4 sm:mb-6">
+        AXIOM CANINE
+    </h4>
+    <p class="font-mono text-xs sm:text-sm text-bone/30 uppercase tracking-[0.2em]">
+        UNBREAKABLE. OFF-LEASH. ANYWHERE.
+    </p>
+</footer>
+
+<!-- INTAKE FORM MODAL -->
+<div id="intake-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/90 backdrop-blur-md p-4 overflow-y-auto pt-20 pb-10 sm:py-4">
+    
+    <div class="modal-content bg-mud border-4 border-coyote max-w-2xl w-full relative shadow-[10px_10px_0px_#D2B48C] my-auto max-h-[95vh] flex flex-col">
+        
+        <button onclick="closeModal()" class="absolute top-3 right-3 sm:top-5 sm:right-5 text-bone/50 hover:text-signal transition-colors p-2 z-10 bg-ranger/80 backdrop-blur-sm group">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-7 h-7 sm:w-9 sm:h-9 group-hover:rotate-90 transition-transform duration-300">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+
+        <div class="p-6 sm:p-8 md:p-12 overflow-y-auto">
+            <div class="mb-8 sm:mb-12 pr-8 sm:pr-0">
+                <h2 class="font-tactical text-4xl sm:text-5xl md:text-6xl uppercase text-bone mb-4 tracking-tight">
+                    GET STARTED
+                </h2>
+                <div class="h-2 w-20 sm:w-24 bg-signal mb-6"></div>
+                <p class="text-base sm:text-lg text-coyote font-medium">
+                    Fill out the details. We'll be in touch.
+                </p>
+            </div>
+
+            <form action="#" method="POST" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+                    <div class="relative">
+                        <label for="name" class="block font-tactical uppercase tracking-wider text-bone mb-2 text-sm sm:text-base">YOUR NAME</label>
+                        <input type="text" id="name" name="name" required 
+                            class="w-full bg-ranger border-2 border-ranger text-bone px-4 py-3 sm:py-4 font-sans focus:outline-none focus:border-signal focus:ring-2 focus:ring-signal/50 transition-all placeholder-bone/30 hover:border-coyote"
+                            placeholder="John Doe">
+                    </div>
+                    
+                    <div class="relative">
+                        <label for="dog" class="block font-tactical uppercase tracking-wider text-bone mb-2 text-sm sm:text-base">DOG'S NAME & BREED</label>
+                        <input type="text" id="dog" name="dog" required 
+                            class="w-full bg-ranger border-2 border-ranger text-bone px-4 py-3 sm:py-4 font-sans focus:outline-none focus:border-signal focus:ring-2 focus:ring-signal/50 transition-all placeholder-bone/30 hover:border-coyote"
+                            placeholder="Rex - GSD">
+                    </div>
+                    
+                    <div class="relative">
+                        <label for="email" class="block font-tactical uppercase tracking-wider text-bone mb-2 text-sm sm:text-base">EMAIL</label>
+                        <input type="email" id="email" name="email" required 
+                            class="w-full bg-ranger border-2 border-ranger text-bone px-4 py-3 sm:py-4 font-sans focus:outline-none focus:border-signal focus:ring-2 focus:ring-signal/50 transition-all placeholder-bone/30 hover:border-coyote"
+                            placeholder="alpha@example.com">
+                    </div>
+                    
+                    <div class="relative">
+                        <label for="phone" class="block font-tactical uppercase tracking-wider text-bone mb-2 text-sm sm:text-base">PHONE</label>
+                        <input type="tel" id="phone" name="phone" required 
+                            class="w-full bg-ranger border-2 border-ranger text-bone px-4 py-3 sm:py-4 font-sans focus:outline-none focus:border-signal focus:ring-2 focus:ring-signal/50 transition-all placeholder-bone/30 hover:border-coyote"
+                            placeholder="(555) 123-4567">
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <label for="goals" class="block font-tactical uppercase tracking-wider text-bone mb-2 text-sm sm:text-base">CURRENT STRUGGLES & OFF-LEASH OBJECTIVES</label>
+                    <textarea id="goals" name="goals" rows="4" required
+                        class="w-full bg-ranger border-2 border-ranger text-bone px-4 py-3 sm:py-4 font-sans focus:outline-none focus:border-signal focus:ring-2 focus:ring-signal/50 transition-all placeholder-bone/30 resize-y min-h-[100px] hover:border-coyote"
+                        placeholder="Tell us what's breaking. Tell us what you want unbreakable."></textarea>
+                </div>
+
+                <button type="submit" class="w-full group bg-signal text-white font-tactical text-xl sm:text-2xl md:text-3xl uppercase tracking-[0.15em] py-4 sm:py-5 px-6 sm:px-8 border-4 border-signal transition-all duration-300 shadow-[6px_6px_0px_#2F3A25] hover:shadow-[2px_2px_0px_#2F3A25] hover:translate-y-[4px] hover:translate-x-[4px] hover:bg-white hover:text-signal hover:border-white relative overflow-hidden">
+                    <span class="relative z-10 flex items-center justify-center gap-3">
+                        SEND
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-6 h-6 group-hover:translate-x-2 transition-transform">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                        </svg>
+                    </span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Modal functions
+    const modal = document.getElementById('intake-modal');
+
+    function openModal() {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Escape" && !modal.classList.contains('hidden')) {
+            closeModal();
+        }
+    });
+
+    // Scroll-triggered fade-in animations
+    const faders = document.querySelectorAll('.fade-in-section');
+    
+    const appearOptions = {
+        threshold: 0.15,
+        rootMargin: "0px 0px -100px 0px"
+    };
+
+    const appearOnScroll = new IntersectionObserver(function(entries, appearOnScroll) {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) {
+                return;
+            } else {
+                entry.target.classList.add('is-visible');
+                appearOnScroll.unobserve(entry.target);
+            }
+        });
+    }, appearOptions);
+
+    faders.forEach(fader => {
+        appearOnScroll.observe(fader);
+    });
+
+    // Parallax effect on hero
+    let scrollY = 0;
+    const parallaxElements = document.querySelectorAll('.parallax-bg');
+    
+    window.addEventListener('scroll', () => {
+        scrollY = window.pageYOffset;
+        parallaxElements.forEach(el => {
+            el.style.setProperty('--scroll-y', `${scrollY * 0.3}px`);
+        });
+    });
+
+    // Add border reveal animation
+    const borderRevealElements = document.querySelectorAll('.border-reveal');
+    
+    const revealOptions = {
+        threshold: 0.3
+    };
+
+    const revealOnScroll = new IntersectionObserver(function(entries, revealOnScroll) {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) {
+                return;
+            } else {
+                entry.target.classList.add('is-visible');
+                revealOnScroll.unobserve(entry.target);
+            }
+        });
+    }, revealOptions);
+
+    borderRevealElements.forEach(element => {
+        revealOnScroll.observe(element);
+    });
+</script>
+```
+
+</body>
+</html>
